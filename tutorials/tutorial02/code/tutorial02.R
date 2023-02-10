@@ -20,14 +20,17 @@ lapply(c("tidyverse",
          "textstem" # an alternative method for lemmatizing
        ), pkgTest)
 
+install.packages("quanteda.textplots")
+library("quanteda.textplots")
 ### A. Using the Guardian API with R
 gu_api_key() # run this interactive function
 
 # We want to query the API on articles featuring Ukraine since Jan 1 2023
-dat <- gu_content(query = "", from_date = "") # making a tibble
-
+dat <- gu_content(query = "Ukraine", from_date = "2023-01-01") # making a tibble
+?gu_content
 # We'll save this data
 saveRDS(dat, "data/df2023")
+?saveRDS
 # And make a duplicate to work on
 df <- dat  
 
@@ -35,7 +38,7 @@ df <- dat
 # Try to find the column we need for our text analyses
 head(df) # checking our tibble
 
-df <- df[] # see if you can subset the object to focus on the articles we want
+df <- df[df$type == "article" & df$section_id == "world",] # see if you can subset the object to focus on the articles we want
 
 which(duplicated(df$web_title) == TRUE) # sometimes there are duplicates...
 df <- df[!duplicated(df$web_title),] # which we can remove
@@ -43,8 +46,8 @@ df <- df[!duplicated(df$web_title),] # which we can remove
 ### B. Making a corpus
 # We can use the corpus() function to convert our df to a quanteda corpus
 corpus_ukr <- corpus(df, 
-                     docid_field = "", 
-                     text_field = "") # select the correct column here
+                     docid_field = "web_title", 
+                     text_field = "body_text") # select the correct column here
 
 # Checking our corpus
 summary(corpus_ukr, 5)
@@ -62,7 +65,7 @@ test <- as.character(corpus_ukr)[1] # make a test object
 
 stri_replace_first(test, 
                    replacement = "", # nothing here (i.e. we're removing)
-                   regex = "") #try to write the correct regex - this may help: https://www.rexegg.com/regex-quickstart.html
+                   regex = "^.+?\"") #try to write the correct regex - this may help: https://www.rexegg.com/regex-quickstart.html
 
 # Sometimes there's also boilerplate at the end of an article after a big centre dot. 
 as.character(corpus_ukr)[which(grepl("\u2022.+$", corpus_ukr))[1]]
@@ -159,6 +162,7 @@ topfeatures(dfm_ukr)
 dfm_ukr %>%
   dfm_trim(min_termfreq = 3) %>%
   textplot_wordcloud(min_size = 1, max_size = 10, max_words = 100)
+
 
 ### Activity
 # In this week's \data repository, you'll find a file called df2022. This is 
