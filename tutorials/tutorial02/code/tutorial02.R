@@ -138,7 +138,7 @@ lemma_toks <- as.tokens(lemma_toks)
 collocations <- textstat_collocations(lemma_toks, size = 2)
 
 # ii. Choose which to keep
-keep_coll_list <- collocations$collocation[1:20]
+keep_coll_list <- collocations$collocation[1:30]
 keep_coll_list
 
 # iii. Apply to tokens object
